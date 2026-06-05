@@ -1,7 +1,9 @@
 from services.vector_store import get_qdrant_client, COLLECTION_NAME
 from services.embeddings import get_embedding_model
 
-def retrieve_context(query: str, top_k: int = 5) -> list[dict]:
+from qdrant_client.http.models import Filter, FieldCondition, MatchValue
+
+def retrieve_context(query: str, top_k: int = 5, space_id: int = None) -> list[dict]:
     client = get_qdrant_client()
     embedding_model = get_embedding_model()
     
@@ -14,9 +16,22 @@ def retrieve_context(query: str, top_k: int = 5) -> list[dict]:
 
     query_vector = embedding_model.embed_query(query)
     
+    
+    query_filter = None
+    if space_id is not None:
+        query_filter = Filter(
+            must=[
+                FieldCondition(
+                    key="space_id",
+                    match=MatchValue(value=space_id)
+                )
+            ]
+        )
+
     search_result = client.search(
         collection_name=COLLECTION_NAME,
         query_vector=query_vector,
+        query_filter=query_filter,
         limit=top_k
     )
     

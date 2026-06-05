@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import ingest, chat
+from routers import ingest, chat, spaces, metrics
 
 app = FastAPI(
     title="Kognite API",
@@ -19,6 +19,8 @@ app.add_middleware(
 
 app.include_router(ingest.router)
 app.include_router(chat.router)
+app.include_router(spaces.router)
+app.include_router(metrics.router)
 
 @app.get("/")
 def read_root():

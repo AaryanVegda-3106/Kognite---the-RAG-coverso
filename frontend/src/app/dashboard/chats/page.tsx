@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Bot, User, Loader2, Link as LinkIcon } from "lucide-react";
+import { Send, Bot, User, Loader2, Link as LinkIcon, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fetchSpaces } from "@/lib/api";
 
 type Message = {
   id: string;
@@ -21,7 +22,13 @@ export default function ChatPage() {
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [spaces, setSpaces] = useState<{id: number, name: string}[]>([]);
+  const [selectedSpace, setSelectedSpace] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchSpaces().then(setSpaces).catch(console.error);
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -29,6 +36,14 @@ export default function ChatPage() {
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+    if (!selectedSpace) {
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: "assistant",
+        content: "Please select a Knowledge Space from the dropdown above before chatting."
+      }]);
+      return;
+    }
 
     const userMessage: Message = { id: Date.now().toString(), role: "user", content: input };
     setMessages(prev => [...prev, userMessage]);
@@ -37,13 +52,13 @@ export default function ChatPage() {
 
     try {
       const history = messages
-        .filter(m => m.id !== "1") // filter out static welcome msg
+        .filter(m => m.id !== "1" && m.role !== "assistant" || m.content !== "Please select a Knowledge Space from the dropdown above before chatting.") // filter out static welcome msg
         .map(m => ({ role: m.role, content: m.content }));
 
       const res = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage.content, history })
+        body: JSON.stringify({ message: userMessage.content, space_id: parseInt(selectedSpace), history })
       });
 
       const data = await res.json();
@@ -70,8 +85,27 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)] animate-in fade-in duration-500">
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+    <div className="flex flex-col h-[calc(100vh-8rem)] animate-in fade-in duration-500 relative">
+      {/* Space Selector Header */}
+      <div className="absolute top-0 left-0 right-0 p-4 flex justify-end z-10 pointer-events-none">
+        <div className="bg-card border border-border/50 rounded-lg shadow-sm pointer-events-auto flex items-center pr-2">
+          <div className="px-3 text-muted-foreground">
+             <Database className="w-4 h-4" />
+          </div>
+          <select 
+            value={selectedSpace} 
+            onChange={(e) => setSelectedSpace(e.target.value)}
+            className="bg-transparent border-none focus:ring-0 py-2 text-sm font-medium text-foreground outline-none cursor-pointer"
+          >
+            <option value="">Select a Space...</option>
+            {spaces.map(space => (
+              <option key={space.id} value={space.id}>{space.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-6 pt-20">
         {messages.map((msg) => (
           <div key={msg.id} className={`flex gap-4 max-w-3xl ${msg.role === "user" ? "ml-auto" : ""}`}>
             {msg.role === "assistant" && (

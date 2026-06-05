@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UploadCloud, FileText, Globe, Video, ArrowRight, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fetchSpaces } from "@/lib/api";
 
 export default function UploadPage() {
   const [activeTab, setActiveTab] = useState<"pdf" | "website" | "youtube">("pdf");
@@ -10,13 +11,24 @@ export default function UploadPage() {
   const [url, setUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [status, setStatus] = useState<{ type: "success" | "error", message: string } | null>(null);
+  const [spaces, setSpaces] = useState<{id: number, name: string}[]>([]);
+  const [selectedSpace, setSelectedSpace] = useState("");
+
+  useEffect(() => {
+    fetchSpaces().then(setSpaces).catch(console.error);
+  }, []);
 
   const handleUpload = async () => {
+    if (!selectedSpace) {
+      setStatus({ type: "error", message: "Please select a knowledge space first." });
+      return;
+    }
     setIsUploading(true);
     setStatus(null);
     try {
       let endpoint = "";
       const formData = new FormData();
+      formData.append("space_id", selectedSpace);
       
       if (activeTab === "pdf") {
         if (!file) throw new Error("Please select a file.");
@@ -68,7 +80,7 @@ export default function UploadPage() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => { setActiveTab(tab.id as any); setStatus(null); }}
+              onClick={() => { setActiveTab(tab.id as "pdf" | "website" | "youtube"); setStatus(null); }}
               className={`flex-1 py-4 px-6 flex items-center justify-center gap-2 text-sm font-medium transition-colors ${
                 activeTab === tab.id 
                   ? "bg-card text-primary border-b-2 border-primary" 
@@ -82,7 +94,21 @@ export default function UploadPage() {
         </div>
 
         {/* Content */}
-        <div className="p-8">
+        <div className="p-8 space-y-6">
+          <div className="space-y-2 mb-6">
+            <label className="text-sm font-medium text-foreground">Knowledge Space</label>
+            <select 
+              value={selectedSpace} 
+              onChange={(e) => setSelectedSpace(e.target.value)}
+              className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-foreground transition-all"
+            >
+              <option value="">Select a space...</option>
+              {spaces.map(space => (
+                <option key={space.id} value={space.id}>{space.name}</option>
+              ))}
+            </select>
+          </div>
+
           {activeTab === "pdf" && (
             <div className="border-2 border-dashed border-border rounded-xl p-12 flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer group relative">
               <input 

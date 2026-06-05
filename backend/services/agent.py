@@ -10,14 +10,11 @@ class AgentState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
     context: list[dict]
 
-def retrieve_node(state: AgentState):
-    messages = state["messages"]
-    last_user_message = next((m.content for m in reversed(messages) if isinstance(m, HumanMessage)), "")
-    
-    if last_user_message:
-        context_docs = retrieve_context(last_user_message, top_k=5)
-        return {"context": context_docs}
-    return {"context": []}
+def retrieve_node(state: AgentState, config: dict):
+    query = state["messages"][-1].content
+    space_id = config.get("configurable", {}).get("space_id")
+    docs = retrieve_context(query, space_id=space_id)
+    return {"context": docs}
 
 def generate_node(state: AgentState):
     if not settings.GEMINI_API_KEY:

@@ -7,6 +7,7 @@ router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
 class ChatRequest(BaseModel):
     message: str
+    space_id: int
     history: list[dict] = [] # [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]
 
 @router.post("/")
@@ -24,7 +25,8 @@ async def chat_endpoint(req: ChatRequest):
         messages.append(HumanMessage(content=req.message))
         
         # Invoke agent
-        final_state = agent_app.invoke({"messages": messages})
+        config = {"configurable": {"thread_id": "1", "space_id": req.space_id}}
+        final_state = agent_app.invoke({"messages": messages}, config=config)
         
         # The last message in the state is the AI's response
         last_message = final_state["messages"][-1]

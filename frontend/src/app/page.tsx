@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FileText, Globe, Video, ArrowRight, BrainCircuit, Sparkles, MessageSquare, BookOpen } from "lucide-react";
+import Link from "next/link";
 import { LoadingScreen } from "@/components/loading-screen";
 import { Button } from "@/components/ui/button";
 
@@ -37,9 +38,11 @@ export default function LandingPage() {
         </nav>
         <div className="flex items-center gap-4">
           <Button variant="ghost" className="hidden md:flex">Sign In</Button>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(110,231,183,0.4)]">
-            Get Started
-          </Button>
+          <Link href="/dashboard">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(110,231,183,0.4)]">
+              Get Started
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -83,9 +86,11 @@ export default function LandingPage() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center gap-4"
           >
-            <Button size="lg" className="h-12 px-8 text-base bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(110,231,183,0.3)] transition-all hover:scale-105">
-              Start Exploring <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
+            <Link href="/dashboard">
+              <Button size="lg" className="h-12 px-8 text-base bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_20px_rgba(110,231,183,0.3)] transition-all hover:scale-105">
+                Start Exploring <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
             <Button size="lg" variant="outline" className="h-12 px-8 text-base border-border hover:bg-secondary">
               Watch Demo
             </Button>

@@ -2,6 +2,7 @@ import operator
 from typing import Annotated, TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
+from langchain_core.runnables.config import RunnableConfig
 from langchain_google_genai import ChatGoogleGenerativeAI
 from services.retriever import retrieve_context
 from core.config import settings
@@ -10,7 +11,7 @@ class AgentState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
     context: list[dict]
 
-def retrieve_node(state: AgentState, config: dict):
+def retrieve_node(state: AgentState, config: RunnableConfig):
     query = state["messages"][-1].content
     space_id = config.get("configurable", {}).get("space_id")
     docs = retrieve_context(query, space_id=space_id)

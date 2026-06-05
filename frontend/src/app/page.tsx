@@ -106,7 +106,7 @@ export default function LandingPage() {
                 <Globe className="text-muted-foreground" />
               </motion.div>
               <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center shadow-lg">
-                <Youtube className="text-muted-foreground" />
+                <Video className="text-muted-foreground" />
               </motion.div>
             </div>
 

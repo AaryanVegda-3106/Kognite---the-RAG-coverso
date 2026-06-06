@@ -1,170 +1,180 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { UploadCloud, FileText, Globe, Video, ArrowRight, CheckCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { fetchSpaces } from "@/lib/api";
+import { UploadCloud, File as FileIcon, Link as LinkIcon, Video, ShieldCheck, Database } from "lucide-react";
+import { useState } from "react";
+import { motion } from "framer-motion";
 
 export default function UploadPage() {
-  const [activeTab, setActiveTab] = useState<"pdf" | "website" | "youtube">("pdf");
-  const [file, setFile] = useState<File | null>(null);
-  const [url, setUrl] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
-  const [status, setStatus] = useState<{ type: "success" | "error", message: string } | null>(null);
-  const [spaces, setSpaces] = useState<{id: number, name: string}[]>([]);
-  const [selectedSpace, setSelectedSpace] = useState("");
+  const [dragActive, setDragActive] = useState(false);
+  const [activeTab, setActiveTab] = useState<'file' | 'link' | 'youtube'>('file');
 
-  useEffect(() => {
-    fetchSpaces().then(setSpaces).catch(console.error);
-  }, []);
-
-  const handleUpload = async () => {
-    if (!selectedSpace) {
-      setStatus({ type: "error", message: "Please select a knowledge space first." });
-      return;
-    }
-    setIsUploading(true);
-    setStatus(null);
-    try {
-      let endpoint = "";
-      const formData = new FormData();
-      formData.append("space_id", selectedSpace);
-      
-      if (activeTab === "pdf") {
-        if (!file) throw new Error("Please select a file.");
-        endpoint = "http://localhost:8000/api/ingest/pdf";
-        formData.append("file", file);
-      } else if (activeTab === "website") {
-        if (!url) throw new Error("Please enter a URL.");
-        endpoint = "http://localhost:8000/api/ingest/website";
-        formData.append("url", url);
-      } else {
-        if (!url) throw new Error("Please enter a YouTube URL.");
-        endpoint = "http://localhost:8000/api/ingest/youtube";
-        formData.append("url", url);
-      }
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Upload failed");
-
-      setStatus({ type: "success", message: data.message });
-      setFile(null);
-      setUrl("");
-    } catch (err: unknown) {
-      const error = err as Error;
-      setStatus({ type: "error", message: error.message });
-    } finally {
-      setIsUploading(false);
-    }
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    else if (e.type === "dragleave") setDragActive(false);
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Add Knowledge</h1>
-        <p className="text-muted-foreground mt-1">Upload PDFs, scrape websites, or ingest YouTube videos.</p>
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">Ingestion Engine</h1>
+          <p className="text-white/50 text-lg max-w-2xl">Upload documents, sync websites, or process YouTube videos. The Kognite engine will automatically chunk, vectorize, and index the content into your selected vault.</p>
+        </motion.div>
       </div>
 
-      <div className="bg-card border border-border/50 rounded-2xl overflow-hidden shadow-sm">
-        {/* Tabs */}
-        <div className="flex flex-col sm:flex-row border-b border-border/50 bg-secondary/20">
-          {[
-            { id: "pdf", label: "PDF Document", icon: FileText },
-            { id: "website", label: "Website URL", icon: Globe },
-            { id: "youtube", label: "Video URL", icon: Video },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => { setActiveTab(tab.id as "pdf" | "website" | "youtube"); setStatus(null); }}
-              className={`flex-1 py-4 px-6 flex items-center justify-center gap-2 text-sm font-medium transition-colors ${
-                activeTab === tab.id 
-                  ? "bg-card text-primary border-b-2 border-primary" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/40 border-b-2 border-transparent"
+      <div className="grid md:grid-cols-3 gap-8">
+        
+        {/* Main Ingestion Area */}
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+          className="md:col-span-2 space-y-6"
+        >
+          {/* Tabs */}
+          <div className="flex gap-4 p-2 bg-black/40 rounded-2xl border border-white/5 backdrop-blur-xl w-max">
+            {[
+              { id: 'file', label: 'Documents', icon: FileIcon },
+              { id: 'link', label: 'Website Link', icon: LinkIcon },
+              { id: 'youtube', label: 'YouTube Video', icon: Video },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as 'file' | 'link' | 'youtube')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
+                  activeTab === tab.id 
+                    ? "bg-primary text-white shadow-[0_0_20px_rgba(217,70,239,0.4)]" 
+                    : "text-white/40 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Main Content Area based on Active Tab */}
+          {activeTab === 'file' ? (
+            <div 
+              className={`relative group bg-[#1A1D2D]/60 backdrop-blur-xl border-2 border-dashed rounded-[2rem] p-16 transition-all duration-500 overflow-hidden text-center flex flex-col items-center justify-center min-h-[400px] ${
+                dragActive 
+                  ? "border-primary bg-primary/5 shadow-[0_0_50px_rgba(217,70,239,0.2)]" 
+                  : "border-white/10 hover:border-primary/50 hover:bg-white/[0.02]"
               }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={(e) => { handleDrag(e); setDragActive(false); }}
             >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Content */}
-        <div className="p-8 space-y-6">
-          <div className="space-y-2 mb-6">
-            <label className="text-sm font-medium text-foreground">Knowledge Space</label>
-            <select 
-              value={selectedSpace} 
-              onChange={(e) => setSelectedSpace(e.target.value)}
-              className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-foreground transition-all"
-            >
-              <option value="">Select a space...</option>
-              {spaces.map(space => (
-                <option key={space.id} value={space.id}>{space.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {activeTab === "pdf" && (
-            <div className="border-2 border-dashed border-border rounded-xl p-12 flex flex-col items-center justify-center text-center hover:border-primary/50 hover:bg-primary/5 transition-colors cursor-pointer group relative">
-              <input 
-                type="file" 
-                accept=".pdf" 
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-                onChange={(e) => {
-                  if (e.target.files && e.target.files[0]) {
-                    setFile(e.target.files[0]);
-                    setStatus(null);
-                  }
-                }}
-              />
-              <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                <UploadCloud className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+              {/* Ambient Pulse */}
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+              
+              <div className="relative z-10 flex flex-col items-center">
+                <div className={`w-24 h-24 rounded-full bg-black/40 border flex items-center justify-center mb-8 transition-all duration-500 shadow-[0_0_30px_rgba(0,0,0,0.5)] ${
+                  dragActive ? "border-primary text-primary scale-110 shadow-[0_0_30px_rgba(217,70,239,0.5)]" : "border-white/10 text-white/40 group-hover:text-white group-hover:scale-110 group-hover:border-primary/50"
+                }`}>
+                  <UploadCloud className="w-10 h-10" />
+                </div>
+                
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  Drag & Drop Files Here
+                </h3>
+                
+                <p className="text-white/40 mb-8 max-w-sm leading-relaxed">
+                  Supports PDF, TXT, DOCX, CSV. Maximum file size 50MB per document.
+                </p>
+                
+                <button className="bg-white text-black hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all rounded-full px-10 py-4 font-bold tracking-wide">
+                  Browse Files
+                </button>
               </div>
-              <h3 className="text-lg font-medium mb-1 text-foreground">{file ? file.name : "Click or drag to upload"}</h3>
-              <p className="text-sm text-muted-foreground">PDFs up to 10MB are supported.</p>
+            </div>
+          ) : (
+            <div className="bg-[#1A1D2D]/60 backdrop-blur-xl border border-white/10 rounded-[2rem] p-16 flex flex-col items-center justify-center min-h-[400px] relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[100px] rounded-full pointer-events-none -z-10"></div>
+              
+              <div className="w-24 h-24 rounded-full bg-black/40 border border-white/10 flex items-center justify-center mb-8 shadow-[0_0_30px_rgba(0,0,0,0.5)] text-primary">
+                {activeTab === 'link' ? <LinkIcon className="w-10 h-10" /> : <Video className="w-10 h-10" />}
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white mb-4">
+                {activeTab === 'link' ? 'Enter Website URL' : 'Enter YouTube URL'}
+              </h3>
+              
+              <p className="text-white/40 mb-8 max-w-sm leading-relaxed text-center">
+                {activeTab === 'link' 
+                  ? 'The engine will crawl the webpage and extract text content automatically.' 
+                  : 'The engine will process the video transcript and metadata.'}
+              </p>
+
+              <div className="w-full max-w-md space-y-4 relative z-10">
+                <div className="relative group">
+                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/20 to-accent/20 blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500"></div>
+                  <input 
+                    type="url"
+                    placeholder={activeTab === 'link' ? "https://example.com" : "https://youtube.com/watch?v=..."}
+                    className="relative w-full bg-black/40 border border-white/10 rounded-xl px-5 py-4 text-white placeholder:text-white/30 outline-none focus:border-primary transition-colors text-center font-medium"
+                  />
+                </div>
+                
+                <button className="w-full bg-primary text-white hover:bg-primary/90 hover:shadow-[0_0_30px_rgba(217,70,239,0.4)] transition-all rounded-xl px-10 py-4 font-bold tracking-wide">
+                  Process Link
+                </button>
+              </div>
             </div>
           )}
+        </motion.div>
 
-          {(activeTab === "website" || activeTab === "youtube") && (
-            <div className="space-y-4">
-              <label className="text-sm font-medium text-foreground">
-                {activeTab === "website" ? "Website URL" : "YouTube URL"}
-              </label>
-              <input
-                type="url"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder={activeTab === "website" ? "https://example.com/article" : "https://youtube.com/watch?v=..."}
-                className="w-full bg-secondary/50 border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary text-foreground transition-all"
-              />
+        {/* Configuration Panel */}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-6"
+        >
+          <div className="bg-[#1A1D2D]/60 backdrop-blur-xl border border-white/5 rounded-[2rem] p-8 shadow-xl">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+              <Database className="w-5 h-5 text-primary" />
+              Ingestion Config
+            </h3>
+            
+            <div className="space-y-6">
+              <div>
+                <label className="text-sm font-bold text-white/50 uppercase tracking-widest block mb-3">Target Vault</label>
+                <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white outline-none focus:border-primary transition-colors appearance-none font-medium">
+                  <option>Finance Knowledge Base</option>
+                  <option>Engineering Docs</option>
+                  <option>HR Policies</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm font-bold text-white/50 uppercase tracking-widest block mb-3">Chunking Strategy</label>
+                <select className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white outline-none focus:border-primary transition-colors appearance-none font-medium">
+                  <option>Semantic (Recommended)</option>
+                  <option>Fixed Size (500 tokens)</option>
+                  <option>Fixed Size (1000 tokens)</option>
+                  <option>Sentence Level</option>
+                </select>
+              </div>
+
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex gap-4 mt-8">
+                <ShieldCheck className="w-6 h-6 text-emerald-500 shrink-0" />
+                <div>
+                  <p className="text-emerald-500 font-bold text-sm mb-1">Secure Processing</p>
+                  <p className="text-emerald-500/70 text-xs leading-relaxed">All documents are encrypted at rest and isolated within your workspace.</p>
+                </div>
+              </div>
             </div>
-          )}
-
-          {status && (
-            <div className={`mt-6 p-4 rounded-lg flex items-center gap-3 text-sm font-medium ${
-              status.type === "success" ? "bg-primary/10 text-primary border border-primary/20" : "bg-destructive/10 text-destructive border border-destructive/20"
-            }`}>
-              {status.type === "success" && <CheckCircle className="w-5 h-5" />}
-              {status.message}
-            </div>
-          )}
-
-          <div className="mt-8 flex justify-end">
-            <Button 
-              onClick={handleUpload} 
-              disabled={isUploading || (activeTab === "pdf" ? !file : !url)}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_15px_rgba(110,231,183,0.3)] transition-all px-8 h-12"
-            >
-              {isUploading ? "Processing..." : "Extract & Ingest"} 
-              {!isUploading && <ArrowRight className="w-4 h-4 ml-2" />}
-            </Button>
           </div>
-        </div>
+        </motion.div>
+
       </div>
     </div>
   );

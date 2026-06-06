@@ -1,29 +1,31 @@
 "use client";
 
-import { Home, Database, UploadCloud, MessageSquare, BarChart, Settings, BrainCircuit } from "lucide-react";
+import { Home, Database, UploadCloud, MessageSquare, BarChart, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { KogniteLogo } from "@/components/logo";
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 border-r border-border bg-card flex flex-col h-full">
-      <div className="p-6 flex items-center gap-2 border-b border-border/50">
-        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20">
-          <BrainCircuit className="w-5 h-5 text-primary" />
-        </div>
-        <span className="font-bold font-jetbrains text-lg tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">Kognite</span>
+    <aside className="w-full h-full bg-[#121626]/60 backdrop-blur-3xl border border-white/5 rounded-[2rem] flex flex-col overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+      <div className="h-24 flex items-center justify-center border-b border-white/5 bg-white/[0.02]">
+        <KogniteLogo className="scale-[0.85]" />
       </div>
-      <nav className="flex-1 p-4 flex flex-col gap-1.5 overflow-y-auto">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-3 mt-4">Menu</div>
-        <SidebarItem href="/dashboard" icon={Home} label="Dashboard" active={pathname === "/dashboard"} />
-        <SidebarItem href="/dashboard/spaces" icon={Database} label="Spaces" active={pathname?.startsWith("/dashboard/spaces")} />
-        <SidebarItem href="/dashboard/upload" icon={UploadCloud} label="Uploads" active={pathname?.startsWith("/dashboard/upload")} />
-        <SidebarItem href="/dashboard/chats" icon={MessageSquare} label="Chats" active={pathname?.startsWith("/dashboard/chats")} />
+
+      <nav className="flex-1 p-6 flex flex-col gap-3 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
+        <div className="text-[11px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-4 mt-2">Workspace</div>
+        <SidebarItem href="/dashboard" icon={Home} label="Overview" active={pathname === "/dashboard"} />
+        <SidebarItem href="/dashboard/spaces" icon={Database} label="Data Vaults" active={pathname?.startsWith("/dashboard/spaces")} />
+        <SidebarItem href="/dashboard/upload" icon={UploadCloud} label="Ingestion" active={pathname?.startsWith("/dashboard/upload")} />
+        
+        <div className="text-[11px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2 px-4 mt-8">Intelligence</div>
+        <SidebarItem href="/dashboard/chats" icon={MessageSquare} label="Synthesize" active={pathname?.startsWith("/dashboard/chats")} />
         <SidebarItem href="/dashboard/analytics" icon={BarChart} label="Analytics" active={pathname?.startsWith("/dashboard/analytics")} />
       </nav>
-      <div className="p-4 border-t border-border/50">
+
+      <div className="p-6 border-t border-white/5 bg-black/20">
         <SidebarItem href="/dashboard/settings" icon={Settings} label="Settings" active={pathname?.startsWith("/dashboard/settings")} />
       </div>
     </aside>
@@ -34,14 +36,28 @@ function SidebarItem({ href, icon: Icon, label, active = false }: { href: string
   return (
     <Link 
       href={href} 
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all group ${
+      className={`relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group overflow-hidden ${
         active 
-          ? "bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(110,231,183,0.1)]" 
-          : "hover:bg-secondary/80 text-muted-foreground hover:text-foreground border border-transparent"
+          ? "bg-primary/10 border border-primary/20 shadow-[0_0_20px_rgba(217,70,239,0.15)]" 
+          : "hover:bg-white/5 border border-transparent"
       }`}
     >
-      <Icon className={`w-4 h-4 ${active ? "text-primary" : "group-hover:text-foreground"}`} />
-      <span className="font-medium text-sm">{label}</span>
+      {/* Active Glow Backdrop */}
+      {active && (
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-50 blur-md pointer-events-none"></div>
+      )}
+      
+      <div className={`relative z-10 flex items-center justify-center w-10 h-10 rounded-xl transition-colors ${
+        active ? "bg-primary/20 text-primary border border-primary/30" : "bg-black/40 text-white/50 group-hover:text-white border border-white/10"
+      }`}>
+        <Icon className={`w-5 h-5 transition-transform duration-300 ${active ? "scale-110" : "group-hover:scale-110"}`} />
+      </div>
+      
+      <span className={`relative z-10 font-bold text-sm tracking-wide transition-colors ${
+        active ? "text-primary shadow-primary/50 drop-shadow-md" : "text-white/60 group-hover:text-white"
+      }`}>
+        {label}
+      </span>
     </Link>
   );
 }

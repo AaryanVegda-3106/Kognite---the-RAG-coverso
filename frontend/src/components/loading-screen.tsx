@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
+import { KogniteLogo } from "@/components/logo";
 
 const messages = [
   "Initializing Intelligence...",
@@ -25,37 +26,70 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   }, [msgIndex, onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background text-foreground overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-background to-background z-0"></div>
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0A0A12] text-white overflow-hidden">
+      {/* Immersive Ambient Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] rounded-full bg-primary/20 blur-[150px] opacity-50 mix-blend-screen animate-pulse" style={{ animationDuration: '4s' }}></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60vw] h-[60vw] rounded-full bg-accent/20 blur-[100px] opacity-50 mix-blend-screen animate-pulse" style={{ animationDuration: '3s', animationDelay: '1s' }}></div>
+        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
+      </div>
       
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="relative flex items-center justify-center mb-12 z-10 w-40 h-40"
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="relative flex flex-col items-center justify-center mb-12 z-10"
       >
-        <div className="absolute inset-0 border-t-2 border-l-2 border-primary rounded-full animate-[spin_3s_linear_infinite]"></div>
-        <div className="absolute inset-2 border-r-2 border-b-2 border-accent rounded-full animate-[spin_2s_linear_infinite_reverse]"></div>
-        <div className="absolute inset-6 bg-primary/5 rounded-full backdrop-blur-sm flex items-center justify-center border border-primary/20 shadow-[0_0_15px_rgba(110,231,183,0.3)]">
-          <h1 className="text-xl font-bold font-jetbrains tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent">
-            KGN
-          </h1>
+        <div className="relative mb-12 flex items-center justify-center">
+          {/* Orbital Rings */}
+          <motion.div 
+            animate={{ rotate: 360 }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            className="absolute w-[200px] h-[200px] rounded-full border border-primary/20 border-t-primary/80 border-r-transparent"
+          ></motion.div>
+          <motion.div 
+            animate={{ rotate: -360 }}
+            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            className="absolute w-[240px] h-[240px] rounded-full border border-accent/20 border-b-accent/80 border-l-transparent"
+          ></motion.div>
+          
+          {/* Pulsing Core Aura */}
+          <div className="absolute w-[120px] h-[120px] rounded-full bg-primary/30 blur-2xl animate-pulse" style={{ animationDuration: '2s' }}></div>
+          
+          {/* Core Logo */}
+          <div className="relative z-10 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full p-6 border border-white/10 shadow-[0_0_50px_rgba(217,70,239,0.3)]">
+            <KogniteLogo showText={false} className="scale-150" />
+          </div>
         </div>
+
+        <h1 className="text-4xl font-bold tracking-[0.3em] text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] mb-4" style={{ fontFamily: "system-ui, sans-serif" }}>
+          KOGNIT<span className="text-[#DCC7A1]">E</span>
+        </h1>
       </motion.div>
 
-      <div className="h-8 z-10 flex items-center justify-center">
+      <div className="h-10 z-10 flex items-center justify-center mb-12">
         <AnimatePresence mode="wait">
           <motion.p
             key={msgIndex}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="text-muted-foreground font-mono text-sm tracking-widest uppercase"
+            initial={{ opacity: 0, y: 10, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: -10, filter: "blur(4px)" }}
+            transition={{ duration: 0.4 }}
+            className="text-white/60 font-mono text-sm tracking-[0.3em] uppercase font-bold"
           >
             {messages[msgIndex]}
           </motion.p>
         </AnimatePresence>
+      </div>
+
+      {/* Futuristic Progress Bar */}
+      <div className="absolute bottom-24 w-64 h-[2px] bg-white/10 overflow-hidden z-10 rounded-full">
+         <motion.div 
+           className="h-full bg-gradient-to-r from-primary via-accent to-primary shadow-[0_0_15px_rgba(217,70,239,0.8)]"
+           initial={{ width: "0%", x: "-100%" }}
+           animate={{ width: "100%", x: "0%" }}
+           transition={{ duration: (messages.length * 0.8), ease: "easeInOut" }}
+         />
       </div>
     </div>
   );

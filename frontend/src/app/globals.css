@@ -49,72 +49,72 @@
 }
 
 :root {
-  --background: #0B0F19;
-  --foreground: #F9FAFB;
-  --card: #111827;
-  --card-foreground: #F9FAFB;
-  --popover: #111827;
-  --popover-foreground: #F9FAFB;
-  --primary: #6EE7B7;
-  --primary-foreground: #0B0F19;
-  --secondary: #1f2937;
-  --secondary-foreground: #F9FAFB;
-  --muted: #1f2937;
-  --muted-foreground: #9CA3AF;
-  --accent: #6EE7B7;
-  --accent-foreground: #0B0F19;
-  --destructive: #ef4444;
-  --border: #374151;
-  --input: #374151;
-  --ring: #6EE7B7;
-  --chart-1: #6EE7B7;
-  --chart-2: #34d399;
-  --chart-3: #10b981;
-  --chart-4: #059669;
-  --chart-5: #047857;
+  --background: #0A0A12;
+  --foreground: #F8FAFC;
+  --card: #141525;
+  --card-foreground: #F8FAFC;
+  --popover: #1C1D30;
+  --popover-foreground: #F8FAFC;
+  --primary: #D946EF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #8B5CF6;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1E1F35;
+  --muted-foreground: #94A3B8;
+  --accent: #E879F9;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --border: rgba(217,70,239,0.2);
+  --input: rgba(217,70,239,0.2);
+  --ring: #D946EF;
+  --chart-1: #D946EF;
+  --chart-2: #8B5CF6;
+  --chart-3: #E879F9;
+  --chart-4: #22C55E;
+  --chart-5: #F59E0B;
   --radius: 0.625rem;
-  --sidebar: #111827;
-  --sidebar-foreground: #F9FAFB;
-  --sidebar-primary: #6EE7B7;
-  --sidebar-primary-foreground: #0B0F19;
-  --sidebar-accent: #1f2937;
-  --sidebar-accent-foreground: #F9FAFB;
-  --sidebar-border: #374151;
-  --sidebar-ring: #6EE7B7;
+  --sidebar: #0A0A12;
+  --sidebar-foreground: #F8FAFC;
+  --sidebar-primary: #D946EF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1E1F35;
+  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-border: rgba(217,70,239,0.2);
+  --sidebar-ring: #D946EF;
 }
 
 .dark {
-  --background: #0B0F19;
-  --foreground: #F9FAFB;
-  --card: #111827;
-  --card-foreground: #F9FAFB;
-  --popover: #111827;
-  --popover-foreground: #F9FAFB;
-  --primary: #6EE7B7;
-  --primary-foreground: #0B0F19;
-  --secondary: #1f2937;
-  --secondary-foreground: #F9FAFB;
-  --muted: #1f2937;
-  --muted-foreground: #9CA3AF;
-  --accent: #6EE7B7;
-  --accent-foreground: #0B0F19;
-  --destructive: #ef4444;
-  --border: #374151;
-  --input: #374151;
-  --ring: #6EE7B7;
-  --chart-1: #6EE7B7;
-  --chart-2: #34d399;
-  --chart-3: #10b981;
-  --chart-4: #059669;
-  --chart-5: #047857;
-  --sidebar: #111827;
-  --sidebar-foreground: #F9FAFB;
-  --sidebar-primary: #6EE7B7;
-  --sidebar-primary-foreground: #0B0F19;
-  --sidebar-accent: #1f2937;
-  --sidebar-accent-foreground: #F9FAFB;
-  --sidebar-border: #374151;
-  --sidebar-ring: #6EE7B7;
+  --background: #0A0A12;
+  --foreground: #F8FAFC;
+  --card: #141525;
+  --card-foreground: #F8FAFC;
+  --popover: #1C1D30;
+  --popover-foreground: #F8FAFC;
+  --primary: #D946EF;
+  --primary-foreground: #FFFFFF;
+  --secondary: #8B5CF6;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1E1F35;
+  --muted-foreground: #94A3B8;
+  --accent: #E879F9;
+  --accent-foreground: #FFFFFF;
+  --destructive: #EF4444;
+  --border: rgba(217,70,239,0.2);
+  --input: rgba(217,70,239,0.2);
+  --ring: #D946EF;
+  --chart-1: #D946EF;
+  --chart-2: #8B5CF6;
+  --chart-3: #E879F9;
+  --chart-4: #22C55E;
+  --chart-5: #F59E0B;
+  --sidebar: #0A0A12;
+  --sidebar-foreground: #F8FAFC;
+  --sidebar-primary: #D946EF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1E1F35;
+  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-border: rgba(217,70,239,0.2);
+  --sidebar-ring: #D946EF;
 }
 
 @layer base {
@@ -126,5 +126,41 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .ambient-bg {
+    background: radial-gradient(circle at center, #172554 0%, #0F172A 100%);
+  }
+  
+  .cognitive-card {
+    @apply bg-card border border-border transition-all duration-300;
+    box-shadow: 0 4px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+  
+  .cognitive-card:hover {
+    @apply border-primary;
+    box-shadow: 0 8px 32px -12px rgba(232, 216, 185, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .primary-glow {
+    box-shadow: 0 0 30px rgba(232, 216, 185, 0.35);
+  }
+  
+  .ai-pulse {
+    animation: ai-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes ai-pulse {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 15px rgba(232, 216, 185, 0.2);
+    }
+    50% {
+      opacity: .8;
+      box-shadow: 0 0 25px rgba(232, 216, 185, 0.4);
+    }
   }
 }

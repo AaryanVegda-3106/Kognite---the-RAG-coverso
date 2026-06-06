@@ -11,8 +11,9 @@ def extract_video_id(url: str) -> str:
 def get_youtube_transcript(url: str) -> list:
     video_id = extract_video_id(url)
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        api = YouTubeTranscriptApi()
+        transcript = api.fetch(video_id)
         # Returns list of dicts: {'text': '...', 'start': 0.0, 'duration': 1.0}
-        return transcript
+        return [{"text": s.text, "start": s.start, "duration": s.duration} for s in transcript.snippets]
     except Exception as e:
         raise ValueError(f"Could not retrieve transcript: {str(e)}")

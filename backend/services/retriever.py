@@ -28,12 +28,12 @@ def retrieve_context(query: str, top_k: int = 5, space_id: int = None) -> list[d
             ]
         )
 
-    search_result = client.search(
+    search_result = client.query_points(
         collection_name=COLLECTION_NAME,
-        query_vector=query_vector,
+        query=query_vector,
         query_filter=query_filter,
         limit=top_k
-    )
+    ).points
     
     results = []
     for hit in search_result:

@@ -3,7 +3,7 @@ from typing import Annotated, TypedDict
 from langgraph.graph import StateGraph, START, END
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
 from langchain_core.runnables.config import RunnableConfig
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from services.retriever import retrieve_context
 from core.config import settings
 
@@ -18,10 +18,10 @@ def retrieve_node(state: AgentState, config: RunnableConfig):
     return {"context": docs}
 
 def generate_node(state: AgentState):
-    if not settings.GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY is not set.")
+    if not settings.NVIDIA_API_KEY:
+        raise ValueError("NVIDIA_API_KEY is not set in .env")
         
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=settings.GEMINI_API_KEY)
+    llm = ChatNVIDIA(model=settings.NVIDIA_MODEL_NAME, nvidia_api_key=settings.NVIDIA_API_KEY)
     
     context_str = "\n\n".join(
         [f"[Source: {doc['source']}]\n{doc['text']}" for doc in state.get("context", [])]

@@ -2,6 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import ingest, chat, spaces, metrics
 from core.config import settings
+from database.session import engine
+from database.models import Base
+
+# Create database tables on startup (needed for fresh PostgreSQL on Render)
+Base.metadata.create_all(bind=engine)
+
 
 app = FastAPI(
     title="Kognite API",

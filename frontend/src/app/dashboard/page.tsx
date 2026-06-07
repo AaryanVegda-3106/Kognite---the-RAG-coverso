@@ -1,16 +1,44 @@
 "use client";
 
-import { Database, FileText, MessageSquare, Activity, ArrowUpRight, Sparkles } from "lucide-react";
+import { Database, FileText, MessageSquare, Activity, ArrowUpRight, Sparkles, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-
-const stats = [
-  { name: "Total Knowledge Spaces", value: "4", icon: Database, trend: "+2 this week", color: "from-primary/40 to-primary/10", border: "border-primary/30", text: "text-primary" },
-  { name: "Documents Ingested", value: "128", icon: FileText, trend: "+45 this week", color: "from-accent/40 to-accent/10", border: "border-accent/30", text: "text-accent" },
-  { name: "Active Queries", value: "1,024", icon: MessageSquare, trend: "+12% vs last month", color: "from-blue-500/40 to-blue-500/10", border: "border-blue-500/30", text: "text-blue-500" },
-  { name: "System Health", value: "99.9%", icon: Activity, trend: "Optimal", color: "from-emerald-500/40 to-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-500" },
-];
+import Link from "next/link";
 
 export default function DashboardPage() {
+  const [metrics, setMetrics] = useState({
+    total_spaces: 0,
+    documents_indexed: 0,
+    queries_answered: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const res = await fetch(`${API_URL}/api/dashboard/metrics`);
+        if (res.ok) {
+          const data = await res.json();
+          setMetrics(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch metrics", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMetrics();
+  }, [API_URL]);
+
+  const stats = [
+    { name: "Total Knowledge Spaces", value: metrics.total_spaces.toString(), icon: Database, trend: "Live", color: "from-primary/40 to-primary/10", border: "border-primary/30", text: "text-primary" },
+    { name: "Documents Ingested", value: metrics.documents_indexed.toString(), icon: FileText, trend: "Live", color: "from-accent/40 to-accent/10", border: "border-accent/30", text: "text-accent" },
+    { name: "Active Queries", value: metrics.queries_answered.toString(), icon: MessageSquare, trend: "Live", color: "from-blue-500/40 to-blue-500/10", border: "border-blue-500/30", text: "text-blue-500" },
+    { name: "System Health", value: "99.9%", icon: Activity, trend: "Optimal", color: "from-emerald-500/40 to-emerald-500/10", border: "border-emerald-500/30", text: "text-emerald-500" },
+  ];
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Header Section */}
@@ -28,14 +56,16 @@ export default function DashboardPage() {
           <p className="text-white/50 text-lg">Your intelligence workspace is ready.</p>
         </motion.div>
         
-        <motion.button 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-white text-black hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all rounded-full px-8 py-4 font-bold tracking-wide flex items-center gap-2"
-        >
-          New Query
-          <ArrowUpRight className="w-5 h-5" />
-        </motion.button>
+        <Link href="/dashboard/chats">
+          <motion.button 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white text-black hover:bg-white/90 hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] transition-all rounded-full px-8 py-4 font-bold tracking-wide flex items-center gap-2"
+          >
+            New Query
+            <ArrowUpRight className="w-5 h-5" />
+          </motion.button>
+        </Link>
       </div>
 
       {/* Stats Grid */}
@@ -63,7 +93,11 @@ export default function DashboardPage() {
               
               <div>
                 <h3 className="text-white/50 font-medium text-sm tracking-wide uppercase mb-2">{stat.name}</h3>
-                <p className={`text-4xl font-bold tracking-tight ${stat.text} drop-shadow-md`}>{stat.value}</p>
+                {isLoading ? (
+                  <Loader2 className={`w-8 h-8 animate-spin ${stat.text} mt-2`} />
+                ) : (
+                  <p className={`text-4xl font-bold tracking-tight ${stat.text} drop-shadow-md`}>{stat.value}</p>
+                )}
               </div>
             </div>
           </motion.div>
@@ -75,28 +109,13 @@ export default function DashboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="mt-12 bg-[#1A1D2D]/60 backdrop-blur-xl border border-white/5 rounded-[2rem] p-8 overflow-hidden relative shadow-xl"
+        className="mt-12 bg-[#1A1D2D]/60 backdrop-blur-xl border border-white/5 rounded-[2rem] p-8 overflow-hidden relative shadow-xl hidden md:block"
       >
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[100px] rounded-full pointer-events-none -z-10"></div>
-        <h2 className="text-2xl font-bold mb-8">Recent Ingestions</h2>
+        <h2 className="text-2xl font-bold mb-8">Recent Activity</h2>
         
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="flex items-center justify-between p-4 rounded-2xl bg-black/20 border border-white/5 hover:border-primary/30 transition-colors group cursor-pointer">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:bg-primary/20 transition-colors">
-                  <Database className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-bold text-white">Q3 Financial Report.pdf</p>
-                  <p className="text-sm text-white/40">Processed into &apos;Finance Vault&apos; • 2 mins ago</p>
-                </div>
-              </div>
-              <div className="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold">
-                Success
-              </div>
-            </div>
-          ))}
+        <div className="flex items-center justify-center p-8 bg-black/20 rounded-2xl border border-white/5 text-white/40">
+          Analytics feature coming soon...
         </div>
       </motion.div>
     </div>

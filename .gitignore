@@ -23,6 +23,7 @@ env/
 
 # Databases / Storage
 qdrant_storage/
+*.db
 
 # IDEs and Editors
 .vscode/
